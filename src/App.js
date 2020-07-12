@@ -1,48 +1,85 @@
 import React from 'react';
 import 'antd/dist/antd.css';
 import './App.css';
-import { Layout, Menu } from 'antd';
+import { Layout, Menu, Button } from 'antd';
 import {
   BrowserRouter as Router,
   Switch,
   Route,
   Link
 } from "react-router-dom";
+import {
+  MenuUnfoldOutlined,
+  MenuFoldOutlined,
+  HomeOutlined,
+  ExperimentOutlined,
+  CalculatorOutlined,
+  LineChartOutlined,
+  PhoneOutlined,
+} from '@ant-design/icons';
 
 import Home from './pages/Home';
 import Info from './pages/Info';
 import Calc from './pages/Calc';
 import Contact from './pages/Contact';
 
-const { Header, Content, Footer } = Layout;
+const { Header, Content, Footer, Sider } = Layout;
 
-function App() {
-  return (
-    <Router>
-      <Layout>
-        <Header className="header">
-          <div className="logo" />
-          <Menu theme="dark" mode="horizontal" defaultSelectedKeys={['home']}>
-            <Menu.Item key="home"><Link to="/">Inicio</Link></Menu.Item>
-            <Menu.Item key="info"><Link to="/info/">Descripción</Link></Menu.Item>
-            <Menu.Item key="calc"><Link to="/calc/">Calculadora</Link></Menu.Item>
-            <Menu.Item key="contact"><Link to="/contact/">Contáctenos</Link></Menu.Item>
-          </Menu>
-        </Header>
-        <Content style={{ padding: '50px' }}>
-          <div className="site-layout-content">
-            <Switch>
-              <Route exact path="/" component={Home} />
-              <Route exact path="/info/" component={Info} />
-              <Route exact path="/calc/" component={Calc} />
-              <Route exact path="/contact/" component={Contact} />
-            </Switch>
-          </div>
-        </Content>
-        <Footer style={{ textAlign: 'center' }}>©2020</Footer>
-      </Layout>
-    </Router>
-  );
+class App extends React.Component {
+  state = {
+    collapsed: false,
+  };
+
+  toggleCollapsed = () => {
+    this.setState({
+      collapsed: !this.state.collapsed,
+    });
+  };
+
+  render() {
+    return (
+      <Router>
+        <Layout hasSider>
+          <Sider
+            breakpoint="lg"
+            collapsedWidth={0}
+            collapsed={this.state.collapsed}
+            trigger={null}
+            onCollapse={(collapsed, type) => {
+              this.toggleCollapsed();
+            }}
+          >
+            <div className="logo" />
+            <Menu theme="dark" mode="inline" defaultSelectedKeys={['home']}>
+              <Menu.Item key="home" icon={<HomeOutlined />}><Link to="/">Inicio</Link></Menu.Item>
+              <Menu.Item key="info" icon={<ExperimentOutlined />}><Link to="/info/">Mediciones</Link></Menu.Item>
+              <Menu.Item key="calc" icon={<CalculatorOutlined />}><Link to="/calc/">Calculadora</Link></Menu.Item>
+              <Menu.Item key="reports" icon={<LineChartOutlined />}><Link to="/reports/">Reportes</Link></Menu.Item>
+              <Menu.Item key="contact" icon={<PhoneOutlined />}><Link to="/contact/">Contáctenos</Link></Menu.Item>
+            </Menu>
+          </Sider>
+          <Layout>
+            <Header className="site-layout-sub-header-background" style={{ padding: 0 }}>
+              <Button type="link" onClick={this.toggleCollapsed} style={{ marginBottom: 16 }}>
+                {this.state.collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined /> }
+              </Button>
+            </Header>
+            <Content style={{ margin: '24px 16px 0' }}>
+              <div className="site-layout-background" style={{ padding: 24, minHeight: 360 }}>
+                <Switch>
+                  <Route exact path="/" component={Home} />
+                  <Route exact path="/info/" component={Info} />
+                  <Route exact path="/calc/" component={Calc} />
+                  <Route exact path="/contact/" component={Contact} />
+                </Switch>
+              </div>
+            </Content>
+            <Footer style={{ textAlign: 'center' }}>©2020</Footer>
+          </Layout>
+        </Layout>
+      </Router>
+    );
+  }
 }
 
 export default App;
