@@ -21,6 +21,7 @@ import {
 import Home from './pages/Home';
 import Info from './pages/Info';
 import Calc from './pages/Calc';
+import Reports from './pages/Reports'
 import Contact from './pages/Contact';
 
 const { Header, Content, Footer, Sider } = Layout;
@@ -70,6 +71,7 @@ class App extends React.Component {
                   <Route exact path="/" component={Home} />
                   <Route exact path="/info/" component={Info} />
                   <Route exact path="/calc/" component={Calc} />
+                  <Route exact path="/reports/" component={Reports} />
                   <Route exact path="/contact/" component={Contact} />
                 </Switch>
               </div>
