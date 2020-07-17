@@ -15,3 +15,23 @@
 [data-theme="dark"] .site-layout-sub-header-background {
   background: #141414;
 }
+
+h1 {
+  font-size: 25px;
+  color: cornflowerblue;
+  text-align: center;
+}
+p {
+  font-size: 25px;
+  text-align: center;
+}
+
+img {
+  width: 25%;
+  align-self: center;
+}
+div#container {
+  display: inline-block;
+  width: 40%;
+  vertical-align: auto;
+}
