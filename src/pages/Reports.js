@@ -1,5 +1,8 @@
 import React from 'react';
-import { DatePicker, Table, Form, Icon, Input, Button, Select, Empty } from 'antd';
+import { DatePicker, Table, Form, Icon, Input, Button, Select, Empty, Row, Col, Divider } from 'antd';
+import { Map, Marker, Popup, TileLayer } from 'react-leaflet'
+
+import 'leaflet/dist/leaflet.css';
 
 import HistoryChart from '../components/HistoryChart';
 
@@ -9,6 +12,7 @@ export default class Reports extends React.Component {
 
   state = {
     dataSource: [],
+    mapPosition: [-2.1494119,-79.9025117],
   }
 
   handleSearch = e => {
@@ -102,8 +106,25 @@ export default class Reports extends React.Component {
           </Button>
         </Form.Item>
       </Form>
-          {this.state.dataSource.length > 0 ? <HistoryChart dataSource={this.state.dataSource} /> : <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} style={{margin: '150px'}} />}
-      <Table dataSource={this.state.dataSource} columns={columns} />
+      <Divider />
+      <Row gutter={[48, 16]}>
+        <Col md={24} lg={12}>
+        {this.state.dataSource.length > 0 ? <HistoryChart dataSource={this.state.dataSource} /> : <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} style={{margin: '150px'}} />}
+        </Col>
+        <Col md={24} lg={12}>
+          <Map center={this.state.mapPosition} zoom={12}>
+            <TileLayer
+              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+              attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+            />
+          </Map>
+        </Col>
+      </Row>
+      <Row gutter={[48, 16]}>
+        <Col span={24}>
+          <Table dataSource={this.state.dataSource} columns={columns} />
+        </Col>
+      </Row>
       </>
     );
   }

@@ -67,3 +67,7 @@ div#contenidoInfo {
   margin-top: 2em;
   margin-right: 2em;
 }
+
+.leaflet-container {
+  height: 100%;
+}
