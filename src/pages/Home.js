@@ -9,7 +9,7 @@ export default () => (
         laborum omnis dolorum natus magnam iusto vero incidunt optio id,
         recusandae harum eos minima autem at porro sit sint expedita ullam!
       </p>
-      <img src="imgBalance.jpg" alt="imgBalance" />
+      <img width="50%" height="50%" src="imgBalance.jpg" alt="imgBalance" />
     </div>
     <div>
       <h1>¿Por qué es importante?</h1>

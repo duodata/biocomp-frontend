@@ -28,8 +28,6 @@ p {
 }
 
 img {
-  width: 50%;
-  height: 50%;
   float: inherit;
   vertical-align: middle;
 }
@@ -45,6 +43,11 @@ div#contenidoInfo {
   display: inline-block;
   vertical-align: auto;
   margin-top: 2em;
+}
+.imgInfo {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
 }
 .imgInfo1 {
   width: 200px;

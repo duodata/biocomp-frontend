@@ -53,7 +53,7 @@ class App extends React.Component {
             <div className="logo" />
             <Menu theme="dark" mode="inline" defaultSelectedKeys={['home']}>
               <Menu.Item key="home" icon={<HomeOutlined />}><Link to="/">Inicio</Link></Menu.Item>
-              <Menu.Item key="info" icon={<ExperimentOutlined />}><Link to="/info/">Mediciones</Link></Menu.Item>
+              <Menu.Item key="info" icon={<ExperimentOutlined />}><Link to="/info/0">Mediciones</Link></Menu.Item>
               <Menu.Item key="calc" icon={<CalculatorOutlined />}><Link to="/calc/">Calculadora</Link></Menu.Item>
               <Menu.Item key="reports" icon={<LineChartOutlined />}><Link to="/reports/">Reportes</Link></Menu.Item>
               <Menu.Item key="contact" icon={<PhoneOutlined />}><Link to="/contact/">Contáctenos</Link></Menu.Item>
@@ -69,7 +69,7 @@ class App extends React.Component {
               <div className="site-layout-background" style={{ padding: 24, minHeight: 360 }}>
                 <Switch>
                   <Route exact path="/" component={Home} />
-                  <Route exact path="/info/" component={Info} />
+                  <Route path="/info/" component={Info} />
                   <Route exact path="/calc/" component={Calc} />
                   <Route exact path="/reports/" component={Reports} />
                   <Route exact path="/contact/" component={Contact} />
