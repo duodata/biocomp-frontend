@@ -71,3 +71,7 @@ div#contenidoInfo {
 .leaflet-container {
   height: 100%;
 }
+
+.ant-form-inline .ant-form-item {
+  margin-bottom: 16px;
+}
