@@ -17,21 +17,50 @@
 }
 
 h1 {
-  font-size: 25px;
+  font-size: 20px;
   color: cornflowerblue;
   text-align: center;
 }
 p {
-  font-size: 25px;
-  text-align: center;
+  font-size: 15px;
+  text-align: justify;
+  text-justify: auto;
 }
 
 img {
-  width: 25%;
-  align-self: center;
+  width: 50%;
+  height: 50%;
+  float: inherit;
+  vertical-align: middle;
 }
 div#container {
+  height: 400px;
+  width: 400px;
   display: inline-block;
-  width: 40%;
   vertical-align: auto;
+}
+div#contenidoInfo {
+  height: 100px;
+  width: 300px;
+  display: inline-block;
+  vertical-align: auto;
+  margin-top: 2em;
+}
+.imgInfo1 {
+  width: 200px;
+  height: 100px;
+  margin: 20px auto;
+  display: block;
+  float: right;
+  margin-top: 2em;
+  margin-left: 2em;
+}
+.imgInfo2 {
+  width: 200px;
+  height: 100px;
+  margin: 20px auto;
+  display: block;
+  float: left;
+  margin-top: 2em;
+  margin-right: 2em;
 }
