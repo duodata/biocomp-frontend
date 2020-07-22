@@ -1,12 +1,41 @@
 import React from 'react';
 import { Form, Row, Col, Radio, InputNumber, Statistic, Card, Select, DatePicker, Button, Divider } from 'antd';
-import { ArrowUpOutlined, ArrowDownOutlined } from '@ant-design/icons';
+import { ArrowUpOutlined, ArrowDownOutlined, InfoCircleOutlined } from '@ant-design/icons';
+import { Steps } from 'intro.js-react';
+
+import 'intro.js/introjs.css';
 
 export default class Calc extends React.Component {
+  state = {
+    stepsEnabled: false,
+    initialStep: 0,
+    steps: [
+      {
+        element: ".formulario",
+        intro: "Digite los valores medidos"
+      },
+      {
+        element: ".calculos",
+        intro: "Los valores requeridos serán calculados automáticamente"
+      },
+      {
+        element: ".guardar",
+        intro: "Puede guardar el cálculo asignándolo a una granja y piscina"
+      },
+    ],
+  };
 
   handleSave = e => {
     e.preventDefault();
+  };
+
+  handleShowSteps = () => {
+    this.setState(() => ({ stepsEnabled: true }));
   }
+
+  onExitSteps = () => {
+    this.setState(() => ({ stepsEnabled: false }));
+  };
 
   render() {
     const layout = {
@@ -18,10 +47,22 @@ export default class Calc extends React.Component {
       },
     };
 
+    const {
+      stepsEnabled,
+      steps,
+      initialStep,
+    } = this.state;
+
     return (
       <>
+      <Steps
+        enabled={stepsEnabled}
+        steps={steps}
+        initialStep={initialStep}
+        onExit={this.onExitSteps}
+      />
       <Row gutter={[48*4, 16]} justify="center">
-        <Col sm={24} md={12} lg={8}>
+        <Col sm={24} md={12} lg={8} className="formulario">
           <Form {...layout}>
             <Form.Item name="radio-group" label="Tipo">
               <Radio.Group>
@@ -60,8 +101,11 @@ export default class Calc extends React.Component {
               <span className="ant-form-text"> Ind/m</span>
             </Form.Item>
           </Form>
+          <Button type="dashed" icon={<InfoCircleOutlined />} onClick={this.handleShowSteps}>
+             Ayuda
+          </Button>
         </Col>
-        <Col sm={24} md={12} lg={8}>
+        <Col sm={24} md={12} lg={8} className="calculos">
           <Card>
             <Statistic
               title="Calcio"
@@ -95,7 +139,7 @@ export default class Calc extends React.Component {
         </Col>
       </Row>
       <Row gutter={[48*4, 16]} justify="center">
-        <Col sm={24} md={24} lg={16}>
+        <Col sm={24} md={24} lg={16} className="guardar">
           <Divider />
           <Form layout="inline" onSubmit={this.handleSave}>
             <Form.Item label="Piscina">
