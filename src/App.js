@@ -50,7 +50,7 @@ class App extends React.Component {
               this.toggleCollapsed();
             }}
           >
-            <div className="logo" />
+            <div className="logo"><h1>Biocomp</h1></div>
             <Menu theme="dark" mode="inline" defaultSelectedKeys={['home']}>
               <Menu.Item key="home" icon={<HomeOutlined />}><Link to="/">Inicio</Link></Menu.Item>
               <Menu.Item key="info" icon={<ExperimentOutlined />}><Link to="/info/0">Mediciones</Link></Menu.Item>

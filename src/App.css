@@ -4,6 +4,12 @@
   margin: 16px;
 }
 
+.logo h1 {
+  text-transform: uppercase;
+  font-weight: bold;
+  font-style: italic;
+}
+
 .site-layout-sub-header-background {
   background: #fff;
 }
