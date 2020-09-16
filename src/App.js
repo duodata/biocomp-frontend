@@ -16,26 +16,39 @@ import {
   CalculatorOutlined,
   LineChartOutlined,
   PhoneOutlined,
+  UserOutlined,
 } from '@ant-design/icons';
+
+import AuthenticationService from './services/authentication.service';
 
 import Home from './pages/Home';
 import Info from './pages/Info';
 import Calc from './pages/Calc';
 import Reports from './pages/Reports'
 import Contact from './pages/Contact';
+import Login from './pages/Login';
 
 const { Header, Content, Footer, Sider } = Layout;
 
 class App extends React.Component {
   state = {
     collapsed: false,
+    currentUser: undefined,
   };
+
+  componentDidMount() {
+    AuthenticationService.currentUser.subscribe(user => this.setState({currentUser: user}));
+  }
 
   toggleCollapsed = () => {
     this.setState({
       collapsed: !this.state.collapsed,
     });
   };
+
+  logout = () => {
+    AuthenticationService.logout();
+  }
 
   render() {
     return (
@@ -57,6 +70,9 @@ class App extends React.Component {
               <Menu.Item key="calc" icon={<CalculatorOutlined />}><Link to="/calc/">Calculadora</Link></Menu.Item>
               <Menu.Item key="reports" icon={<LineChartOutlined />}><Link to="/reports/">Reportes</Link></Menu.Item>
               <Menu.Item key="contact" icon={<PhoneOutlined />}><Link to="/contact/">Contáctenos</Link></Menu.Item>
+              {this.state.currentUser &&
+                <Menu.Item key="profile" icon={<UserOutlined />}><Link to="/" onClick={this.logout}> Cerrar sesión</Link></Menu.Item>
+              }
             </Menu>
           </Sider>
           <Layout>
@@ -70,8 +86,8 @@ class App extends React.Component {
                 <Switch>
                   <Route exact path="/" component={Home} />
                   <Route path="/info/" component={Info} />
-                  <Route exact path="/calc/" component={Calc} />
-                  <Route exact path="/reports/" component={Reports} />
+                  <Route exact path="/calc/" component={this.state.currentUser ? Calc : Login} />
+                  <Route exact path="/reports/" component={this.state.currentUser ? Reports : Login} />
                   <Route exact path="/contact/" component={Contact} />
                 </Switch>
               </div>
