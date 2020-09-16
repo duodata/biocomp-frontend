@@ -5,16 +5,18 @@ export default class HistoryChart extends React.Component {
 
   render() {
     const legend = {
-        ca: 'Calcio',
-        mg: 'Magnecio',
-        k: 'Potasio'
+        1: 'Calcio',
+        2: 'Magnecio',
+        3: 'Potasio',
+        4: 'Salinidad',
+        5: 'Densidad',
     }
 
     let data = []
     for (const row of this.props.dataSource) {
-        for (const f of ['mg', 'ca', 'k']) {
+        for (const f of [1, 2, 3, 4, 5]) {
             data.push({
-                date: row.date,
+                date: row.fecha,
                 type: legend[f],
                 value: row[f],
             })

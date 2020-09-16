@@ -1,9 +1,11 @@
 import React from 'react';
-import { Form, Row, Col, Radio, InputNumber, Statistic, Card, Select, DatePicker, Button, Divider } from 'antd';
+import { Form, Row, Col, Radio, InputNumber, Statistic, Card, Select, DatePicker, Button, Divider, Alert } from 'antd';
 import { ArrowUpOutlined, ArrowDownOutlined, InfoCircleOutlined } from '@ant-design/icons';
 import { Steps } from 'intro.js-react';
 
 import 'intro.js/introjs.css';
+
+import DataService from '../services/data.service';
 
 export default class Calc extends React.Component {
   state = {
@@ -23,10 +25,62 @@ export default class Calc extends React.Component {
         intro: "Puede guardar el cálculo asignándolo a una granja y piscina"
       },
     ],
+    saveMessage: '',
+    saveMessageType: '',
+    variables: [],
+    granjas: [],
+    piscinas: [],
+    granjaId: null,
+    piscinaId: null,
+    fecha: null,
+    mediciones: null,
   };
+
+  componentDidMount() {
+    DataService.getGranjas().then(granjas => this.setState({granjas}));
+    DataService.getVariables().then(variables => this.setState({variables}));
+  }
+
+  handleMedicionChange = (changedValues, allValues) => {
+    /*
+    {variableId: value} to {"variable": variableId, "valor": value}
+    */
+    const mediciones = Object.entries(allValues).map(([variable, valor]) => ({variable: variable, valor: valor}))
+    this.setState({mediciones: mediciones})
+  }
+
+  handleChangeGranja = granjaId => {
+    if (granjaId) {
+      DataService.getPiscinas(granjaId).then(piscinas => this.setState({piscinas, granjaId}));
+    } else {
+      this.setState({piscinas: []});
+    }
+    this.setState({piscinaId: null})
+  }
+
+  handleChangePiscina = piscinaId => {
+    this.setState({piscinaId});
+  }
+
+  handleChangeFecha = (_, fecha) => {
+    this.setState({fecha});
+  }
 
   handleSave = e => {
     e.preventDefault();
+    DataService.postMuestra({
+      piscina: this.state.piscinaId,
+      fecha: this.state.fecha,
+      mediciones: this.state.mediciones,
+    }).then(
+      () => {
+        this.setState({saveMessage: "Guardado con éxito", saveMessageType: "success"})
+        this.setState({piscinaId: null, fecha: null, mediciones: []})
+      },
+      error => {
+        this.setState({saveMessage: "Hubo un error", saveMessageType: "error"})
+      }
+    );
   };
 
   handleShowSteps = () => {
@@ -63,43 +117,21 @@ export default class Calc extends React.Component {
       />
       <Row gutter={[48*4, 16]} justify="center">
         <Col sm={24} md={12} lg={8} className="formulario">
-          <Form {...layout}>
-            <Form.Item name="radio-group" label="Tipo">
+          <Form {...layout} onValuesChange={this.handleMedicionChange}>
+            <Form.Item label="Tipo">
               <Radio.Group>
                 <Radio.Button value="larva">Larva</Radio.Button>
                 <Radio.Button value="camaronera">Camaronera</Radio.Button>
               </Radio.Group>
             </Form.Item>
-            <Form.Item label="Calcio">
-              <Form.Item name="ca" noStyle>
-                <InputNumber min={1} max={100} />
+            {this.state.variables.map(v =>
+              <Form.Item key={v.id} label={v.nombre}>
+                <Form.Item name={v.id} noStyle>
+                  <InputNumber min={v.minimo} max={v.maximo} />
+                </Form.Item>
+                <span className="ant-form-text"> {v.unidad}</span>
               </Form.Item>
-              <span className="ant-form-text"> mg/L</span>
-            </Form.Item>
-            <Form.Item label="Magnesio">
-              <Form.Item name="mg" noStyle>
-                <InputNumber min={1} max={100} />
-              </Form.Item>
-              <span className="ant-form-text"> mg/L</span>
-            </Form.Item>
-            <Form.Item label="Potasio">
-              <Form.Item name="k" noStyle>
-                <InputNumber min={1} max={100} />
-              </Form.Item>
-              <span className="ant-form-text"> mg/L</span>
-            </Form.Item>
-            <Form.Item label="Salinidad">
-              <Form.Item name="salinidad" noStyle>
-                <InputNumber min={1} max={100} />
-              </Form.Item>
-              <span className="ant-form-text"> ups</span>
-            </Form.Item>
-            <Form.Item label="Densidad">
-              <Form.Item name="densidad" noStyle>
-                <InputNumber min={1} max={100} />
-              </Form.Item>
-              <span className="ant-form-text"> Ind/m</span>
-            </Form.Item>
+            )}
           </Form>
           <Button type="dashed" icon={<InfoCircleOutlined />} onClick={this.handleShowSteps}>
              Ayuda
@@ -141,41 +173,48 @@ export default class Calc extends React.Component {
       <Row gutter={[48*4, 16]} justify="center">
         <Col sm={24} md={24} lg={16} className="guardar">
           <Divider />
-          <Form layout="inline" onSubmit={this.handleSave}>
-            <Form.Item label="Piscina">
+          <Form layout="inline" onSubmit={this.handleSave} onValuesChange={this.handlePlaceChange} preserve={false}>
+            <Form.Item label="Granja" name="granjaId">
               <Select
                 style={{ width: 200 }}
                 showSearch
                 filterOption={(input, option) =>
                   option.props.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
                 }
+                onChange={this.handleChangeGranja}
+                value={this.state.granjaId}
               >
-                <Select.Option value="10401">10401</Select.Option>
-                <Select.Option value="10402">10402</Select.Option>
-                <Select.Option value="10403">10403</Select.Option>
+                {this.state.granjas.map(g => <Select.Option key={g.id} value={g.id}>{g.nombre}</Select.Option>)}
               </Select>
             </Form.Item>
-            <Form.Item label="Granja">
+            <Form.Item label="Piscina" name="piscinaId">
               <Select
                 style={{ width: 200 }}
                 showSearch
                 filterOption={(input, option) =>
                   option.props.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
                 }
+                // disabled={this.state.piscinas.length === 0}
+                onChange={this.handleChangePiscina}
+                value={this.state.piscinaId}
               >
-                <Select.Option value="10401">10401</Select.Option>
-                <Select.Option value="10402">10402</Select.Option>
-                <Select.Option value="10403">10403</Select.Option>
+                {this.state.piscinas.map(p => <Select.Option key={p.id} value={p.id}>{p.nombre}</Select.Option>)}
               </Select>
             </Form.Item>
-            <Form.Item label="Fecha">
-              <DatePicker />
+            <Form.Item label="Fecha" name="fecha">
+              <DatePicker onChange={this.handleChangeFecha} />
             </Form.Item>
             <Form.Item>
-              <Button type="primary" htmlType="submit" onClick={this.handleSave}>
+              <Button type="primary" htmlType="submit" onClick={this.handleSave}
+                disabled={!this.state.granjaId || !this.state.piscinaId || !this.state.fecha}>
                 Guardar
               </Button>
             </Form.Item>
+            {this.state.saveMessage &&
+            <Form.Item>
+              <Alert message={this.state.saveMessage} type={this.state.saveMessageType} showIcon />
+            </Form.Item>
+            }
           </Form>
             </Col>
           </Row>

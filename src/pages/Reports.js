@@ -1,10 +1,11 @@
 import React from 'react';
-import { DatePicker, Table, Form, Icon, Input, Button, Select, Empty, Row, Col, Divider } from 'antd';
+import { DatePicker, Table, Form, Button, Select, Empty, Row, Col, Divider, message, Popconfirm, Space} from 'antd';
 import { Map, Marker, Popup, TileLayer } from 'react-leaflet'
 
 import 'leaflet/dist/leaflet.css';
 
 import HistoryChart from '../components/HistoryChart';
+import DataService from '../services/data.service';
 
 const { RangePicker } = DatePicker;
 
@@ -13,64 +14,166 @@ export default class Reports extends React.Component {
   state = {
     dataSource: [],
     mapPosition: [-2.1494119,-79.9025117],
+    mapZoom: 12,
+    variables: [],
+    granjas: [],
+    piscinas: [],
+    granjaId: null,
+    piscinaId: null,
+    fechaInicio: null,
+    fechaFin: null,
+  }
+
+  componentDidMount() {
+    DataService.getGranjas().then(granjas => this.setState({granjas}));
+    DataService.getVariables().then(variables => this.setState({variables}));
+  }
+
+  centerMap(granjaId, piscinaId) {
+    let mapPosition = [-2.1494119,-79.9025117];
+    let mapZoom = 12;
+
+    if (piscinaId) {
+      const piscina = this.state.piscinas.find(p => p.id === piscinaId)
+      mapPosition = [piscina.latitud, piscina.longitud];
+      mapZoom = 16;
+    } else if (granjaId) {
+      const granja = this.state.granjas.find(g => g.id === granjaId)
+      mapPosition = [granja.latitud, granja.longitud];
+      mapZoom = 14;
+    }
+    this.setState({mapPosition: mapPosition, mapZoom: mapZoom})
+  }
+
+  handleChangeGranja = granjaId => {
+    if (granjaId) {
+      DataService.getPiscinas(granjaId).then(piscinas => this.setState({piscinas, granjaId}));
+    } else {
+      this.setState({piscinas: []});
+    }
+    this.setState({piscinaId: null});
+    this.centerMap(granjaId, this.state.piscinaId);
+  }
+
+  handleChangePiscina = piscinaId => {
+    this.setState({piscinaId});
+    this.centerMap(this.state.granjaId, piscinaId);
+  }
+
+  handleChangeFecha = (_, fechas) => {
+    this.setState({fechaInicio: fechas[0], fechaFin: fechas[1]});
   }
 
   handleSearch = e => {
-    e.preventDefault();
+    if (e)
+      e.preventDefault();
 
-    const dataSource = [
-      {
-        key: '1',
-        date: '2020-01-20',
-        mg: 100,
-        ca: 200,
-        k: 300,
-      },
-      {
-        key: '2',
-        date: '2020-01-24',
-        mg: 800,
-        ca: 300,
-        k: 400,
-      },
-      {
-        key: '3',
-        date: '2020-01-28',
-        mg: 130,
-        ca: 250,
-        k: 500,
-      },
-    ];
+    let params = {
+      granja: this.state.granjaId,
+      fechaInicio: this.state.fechaInicio,
+      fechaFin: this.state.fechaFin,
+    }
 
-    this.setState({dataSource: dataSource})
+    if (this.state.piscinaId)
+      params.piscina = this.state.piscinaId;
+
+    DataService.getMuestras(params).then(
+      muestras => {
+
+        let dataSource = []
+
+        muestras.forEach(m => {
+          let muestra = {
+            key: m.id,
+            fecha: m.fecha,
+          };
+
+          m.mediciones.forEach(med => muestra[med.variable] = med.valor);
+
+          dataSource.push(muestra);
+        });
+
+        this.setState({dataSource: dataSource})
+      },
+      error => {
+        // todo
+      }
+    );
+  }
+
+  handleDelete = key => {
+    DataService.deleteMuestra(key).then(
+      () => {
+        message.error("Eliminado");
+        this.handleSearch();
+      },
+      error => {}
+    );
+  }
+
+  handleAlert = key => {
+    message.loading({content: 'Enviando...', key: key})
+    DataService.alertarMuestra(key).then(
+      response => {
+        message.warning({content: response.msg, key: key});
+      },
+      error => {
+        message.error({content: 'Error enviando la alerta', key: key});
+      }
+    );
   }
 
   render() {
-    const columns = [
+    let columns = [
       {
         title: 'Fecha',
-        dataIndex: 'date',
-        key: 'date',
-      },
-      {
-        title: 'Calcio',
-        dataIndex: 'ca',
-        key: 'ca',
-      },
-      {
-        title: 'Magnesio',
-        dataIndex: 'mg',
-        key: 'mg',
-      },
-      {
-        title: 'Potasio',
-        dataIndex: 'k',
-        key: 'k',
+        dataIndex: 'fecha',
+        key: 'fecha',
       },
     ];
+
+    this.state.variables.forEach(v => columns.push({
+      title: v.nombre,
+      dataIndex: v.id,
+      key: v.id,
+    }))
+
+    columns.push(
+      {
+        title: 'operation',
+        dataIndex: 'operation',
+        render: (text, record) =>
+          this.state.dataSource.length >= 1 ? (
+            <>
+            <Space size="middle">
+              <Popconfirm title="Seguro de eliminar?" onConfirm={() => this.handleDelete(record.key)}>
+                <a>Eliminar</a>
+              </Popconfirm>
+              <Popconfirm title="Seguro de alertar?" onConfirm={() => this.handleAlert(record.key)}>
+                <a>Alertar</a>
+              </Popconfirm>
+            </Space>
+            </>
+          ) : null,
+      }
+    )
+
     return (
       <>
       <Form layout="inline" onSubmit={this.handleSearch}>
+        <Form.Item label="Granja" name="granjaId">
+          <Select
+            style={{ width: 200 }}
+            showSearch
+            filterOption={(input, option) =>
+              option.props.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
+            }
+            onChange={this.handleChangeGranja}
+            value={this.state.granjaId}
+          >
+            {this.state.granjas.map(g => <Select.Option key={g.id} value={g.id}>{g.nombre}</Select.Option>)}
+          </Select>
+        </Form.Item>
         <Form.Item label="Piscina">
           <Select
             style={{ width: 200 }}
@@ -78,30 +181,19 @@ export default class Reports extends React.Component {
             filterOption={(input, option) =>
               option.props.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
             }
+            onChange={this.handleChangePiscina}
+            value={this.state.piscinaId}
           >
-            <Select.Option value="10401">10401</Select.Option>
-            <Select.Option value="10402">10402</Select.Option>
-            <Select.Option value="10403">10403</Select.Option>
-          </Select>
-        </Form.Item>
-        <Form.Item label="Granja">
-          <Select
-            style={{ width: 200 }}
-            showSearch
-            filterOption={(input, option) =>
-              option.props.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
-            }
-          >
-            <Select.Option value="10401">10401</Select.Option>
-            <Select.Option value="10402">10402</Select.Option>
-            <Select.Option value="10403">10403</Select.Option>
+            <Select.Option key={0} value={null}>Todas</Select.Option>)}
+            {this.state.piscinas.map(p => <Select.Option key={p.id} value={p.id}>{p.nombre}</Select.Option>)}
           </Select>
         </Form.Item>
         <Form.Item label="Fecha">
-          <RangePicker />
+          <RangePicker onChange={this.handleChangeFecha} />
         </Form.Item>
         <Form.Item>
-          <Button type="primary" htmlType="submit" onClick={this.handleSearch}>
+          <Button type="primary" htmlType="submit" onClick={this.handleSearch}
+            disabled={!this.state.granjaId || !this.state.fechaInicio || !this.state.fechaFin}>
             Consultar
           </Button>
         </Form.Item>
@@ -112,7 +204,7 @@ export default class Reports extends React.Component {
         {this.state.dataSource.length > 0 ? <HistoryChart dataSource={this.state.dataSource} /> : <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} style={{margin: '150px'}} />}
         </Col>
         <Col md={24} lg={12}>
-          <Map center={this.state.mapPosition} zoom={12}>
+          <Map center={this.state.mapPosition} zoom={this.state.mapZoom}>
             <TileLayer
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
               attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
