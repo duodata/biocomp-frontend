@@ -1,6 +1,6 @@
 import React from 'react';
 import { DatePicker, Table, Form, Button, Select, Empty, Row, Col, Divider, message, Popconfirm, Space} from 'antd';
-import { Map, Marker, Popup, TileLayer } from 'react-leaflet'
+import { Map, TileLayer } from 'react-leaflet'
 
 import 'leaflet/dist/leaflet.css';
 

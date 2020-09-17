@@ -1,12 +1,8 @@
 import React from "react";
 import { Steps, Divider, Col, Row } from 'antd';
 import {
-  BrowserRouter as Router,
   Switch,
   Route,
-  Link,
-  useLocation,
-  useHistory,
 } from "react-router-dom";
 
 const { Step } = Steps;
