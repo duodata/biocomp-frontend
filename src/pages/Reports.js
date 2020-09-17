@@ -140,17 +140,17 @@ export default class Reports extends React.Component {
 
     columns.push(
       {
-        title: 'operation',
+        title: '',
         dataIndex: 'operation',
         render: (text, record) =>
           this.state.dataSource.length >= 1 ? (
             <>
             <Space size="middle">
-              <Popconfirm title="Seguro de eliminar?" onConfirm={() => this.handleDelete(record.key)}>
-                <a>Eliminar</a>
-              </Popconfirm>
               <Popconfirm title="Seguro de alertar?" onConfirm={() => this.handleAlert(record.key)}>
-                <a>Alertar</a>
+                <Button>Alertar</Button>
+              </Popconfirm>
+              <Popconfirm title="Seguro de eliminar?" onConfirm={() => this.handleDelete(record.key)}>
+                <Button danger>Eliminar</Button>
               </Popconfirm>
             </Space>
             </>
