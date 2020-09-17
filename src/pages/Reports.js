@@ -1,5 +1,5 @@
 import React from 'react';
-import { DatePicker, Table, Form, Button, Select, Empty, Row, Col, Divider, message, Popconfirm, Space} from 'antd';
+import { DatePicker, Table, Form, Button, Select, Empty, Row, Col, Divider, message, Popconfirm, Space, Badge} from 'antd';
 import { Map, TileLayer } from 'react-leaflet'
 
 import 'leaflet/dist/leaflet.css';
@@ -86,6 +86,7 @@ export default class Reports extends React.Component {
           let muestra = {
             key: m.id,
             fecha: m.fecha,
+            alertas: m.alertas,
           };
 
           m.mediciones.forEach(med => muestra[med.variable] = med.valor);
@@ -116,6 +117,7 @@ export default class Reports extends React.Component {
     DataService.alertarMuestra(key).then(
       response => {
         message.warning({content: response.msg, key: key});
+        this.handleSearch();
       },
       error => {
         message.error({content: 'Error enviando la alerta', key: key});
@@ -147,7 +149,9 @@ export default class Reports extends React.Component {
             <>
             <Space size="middle">
               <Popconfirm title="Seguro de alertar?" onConfirm={() => this.handleAlert(record.key)}>
-                <Button>Alertar</Button>
+                <Badge count={record.alertas}>
+                  <Button>Alertar</Button>
+                </Badge>
               </Popconfirm>
               <Popconfirm title="Seguro de eliminar?" onConfirm={() => this.handleDelete(record.key)}>
                 <Button danger>Eliminar</Button>
